@@ -1,6 +1,6 @@
 import React from 'react' ;
 import axios from 'axios' ;
-
+import {connect} from 'react-redux' ;
 
 class Login extends React.Component {
   state = {
@@ -16,7 +16,17 @@ change=(e,field)=>{
 let data = {'email':this.state.email,'password':this.state.password}
 axios.post('http://127.0.0.1:8000/api/token/',data).then(res=>{
   localStorage.setItem('token',res.data.token)
-  this.props.history.push('/chat_list/')
+
+  let config =  {headers: {Authorization : 'Bearer '+localStorage.getItem('token')}}
+  axios.get('http://127.0.0.1:8000/api/user/get_user_info/',config).then(res=>{
+    console.log(res.data);
+    localStorage.setItem('user_id',res.data.user_info.id)
+    localStorage.setItem('username',res.data.user_info.username)
+    localStorage.setItem('profile_id',res.data.user_info.profile_id)
+    this.props.login()
+    this.props.history.push('/chat_list/')
+  })
+
 })
   }
   render(){
@@ -44,4 +54,9 @@ axios.post('http://127.0.0.1:8000/api/token/',data).then(res=>{
     )
   }
 }
-export default Login ;
+const mapDispatchToProps = (dispatch)=>{
+  return {
+    login : ()=>dispatch({type:'login'}) ,
+  }
+}
+export default connect(null,mapDispatchToProps)(Login) ;

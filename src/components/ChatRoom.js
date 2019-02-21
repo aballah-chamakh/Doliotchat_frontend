@@ -11,6 +11,7 @@ class ChatRoom extends React.Component {
   }
   send_msg = ()=>{
     this.ws_client.send(JSON.stringify({message:this.state.message}))
+    this.setState({message:''})
 
   }
   componentDidMount(){
@@ -29,10 +30,10 @@ class ChatRoom extends React.Component {
      }else if (message.type == 'new_message') {
        console.log('new message');
        let thread = this.state.thread
-       thread.messages.push({content:message.message,owner:'any'})
+       thread.messages.push(message.message)
        this.setState({thread:thread})
      }
-      console.log(e)
+      //console.log(e)
     }
     this.ws_client.onclose = (e)=>{
       console.log(e);
@@ -43,20 +44,41 @@ class ChatRoom extends React.Component {
   }
   render(){
     return(
-      <div class='row' style={{marginTop:'200px'}}>
+      <div class='row' style={{marginTop:'100px'}}>
        <div class='col-lg-8 offset-lg-2'>
+       { this.state.thread ?
+       <div>
+       <div>
+           {this.state.thread.first_user.user.id != localStorage.getItem('user_id') ?
+             <center>
+             <img src={'http://127.0.0.1:8000'+this.state.thread.first_user.image} height='150px' width='150px' style={{'borderRadius':'50%'}} />
+             <h3 class='text-primary'>{this.state.thread.first_user.user.username}</h3>
+             </center>
+             : <center>
+             <img src={'http://127.0.0.1:8000'+this.state.thread.second_user.image} height='150px' width='150px' style={{'borderRadius':'50%'}} />
+             <h3 class='text-primary'>{this.state.thread.second_user.user.username}</h3>
+             </center> }
+
+
+       </div>
         <div  style={{overflow:'scroll',height:'300px'}}>
-        { this.state.thread ?
+
           <div>
           {this.state.thread.messages.map(msg=>{
             return(
-             <p style={{marginBottom:'10px'}}>{msg.owner} : -- {msg.content}</p>
+              <div class='row' style={{marginBottom:'20px'}}>
+              <div style={{backgroundColor:'#c7dbf9',borderRadius:'25px',padding:'5px 5px 5px 20px'}} class={localStorage.getItem('profile_id')!=msg.profile_id  ?'col-lg-7 col-md-7 col-sm-7' :'col-lg-7 col-md-7 col-sm-7 offset-lg-5 offset-md-5 offset-sm-5'}>
+              <img src={'http://127.0.0.1:8000'+msg.owner_image} height='30px' width='30px' style={{'borderRadius':'50%'}}/>
+             <p style={{marginBottom:'10px',color:'grey'}}>{msg.owner} : {msg.content}</p>
+             </div>
+             </div>
             )
           })}
           </div>
-        : null }
-        </div>
 
+        </div>
+        </div>
+      : null }
       <textarea  rows="2"  class="form-control" onChange={(e)=>{this.change(e)}} value={this.state.message}  placeholder="Send message"></textarea>
 
 
