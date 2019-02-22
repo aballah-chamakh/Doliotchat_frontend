@@ -9,9 +9,14 @@ class ChatRoom extends React.Component {
   change = (e)=>{
     this.setState({message:e.target.value})
   }
-  send_msg = ()=>{
+  send_msg = (e)=>{
+    if (e == null || e.key=='Enter'){
+      if(e != null){
+      e.preventDefault() }
     this.ws_client.send(JSON.stringify({message:this.state.message}))
     this.setState({message:''})
+
+  }
 
   }
   componentDidMount(){
@@ -21,6 +26,7 @@ class ChatRoom extends React.Component {
       console.log(e);
     }
     this.ws_client.onmessage = (e)=>{
+    //  this.thread.scrollTop = this.thread.scrollHeight
      let message = JSON.parse(e.data)
      console.log(message);
 
@@ -61,7 +67,7 @@ class ChatRoom extends React.Component {
 
 
        </div>
-        <div  style={{overflow:'scroll',height:'300px'}}>
+        <div ref={(thread)=>{this.thread=thread}} style={{overflow:'auto',height:'300px'}}>
 
           <div>
           {this.state.thread.messages.map(msg=>{
@@ -79,10 +85,10 @@ class ChatRoom extends React.Component {
         </div>
         </div>
       : null }
-      <textarea  rows="2"  class="form-control" onChange={(e)=>{this.change(e)}} value={this.state.message}  placeholder="Send message"></textarea>
+      <textarea  rows="2"  class="form-control" onChange={(e)=>{this.change(e)}} onKeyPress={(e)=>{this.send_msg(e)}} value={this.state.message}  placeholder="Send message"></textarea>
 
 
-      <center><button style={{marginTop:'30px'}} class='btn btn-warning  ' onClick={this.send_msg}>Send</button></center>
+      <center><button style={{marginTop:'30px'}} class='btn btn-warning  ' onClick={()=>this.send_msg(null)}>Send</button></center>
 
 
         </div>
